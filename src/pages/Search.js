@@ -1,37 +1,27 @@
 import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { useDispatch, useSelector } from "react-redux";
-import { getHomePageVideos } from "../store/reducers/getHomePageVideos";
-import Shimmer from "../components/Shimmer";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Card from "../components/Card";
+import Shimmer from "../components/Shimmer";
+import { getSearchPageVideos } from "../store/reducers/getSearchPageVideos";
+import { clearVideos } from "../features/youtube/youtubeSlice";
 
-const Home = () => {
+export default function Search() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const videos = useSelector((state) => state.youtubeApp.videos);
+  const searchTerm = useSelector((state) => state.youtubeApp.searchTerm);
 
   useEffect(() => {
-    const fetchHomePageVideos = async () => {
-      try {
-        await dispatch(getHomePageVideos(false));
-        console.log(videos);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchHomePageVideos();
-  }, [dispatch, videos]);
-
-  const fetchMoreVideos = async () => {
-    try {
-      await dispatch(getHomePageVideos(true));
-    } catch (error) {
-      console.error(error);
+    dispatch(clearVideos());
+    if (searchTerm === "") navigate("/");
+    else {
+      dispatch(getSearchPageVideos(false));
     }
-  };
-
+  }, [dispatch, navigate, searchTerm]);
   return (
     <div className="max-h-screen overflow-auto">
       <div style={{ height: "7.5vh" }}>
@@ -42,16 +32,16 @@ const Home = () => {
         {videos.length ? (
           <InfiniteScroll
             dataLength={videos.length}
-            next={fetchMoreVideos}
+            next={() => dispatch(getSearchPageVideos(true))}
             hasMore={videos.length < 500}
             loader={<Shimmer />}
             height={650}
           >
-            <div className="grid gap-y-10 gap-x-8 grid-cols-4 p-8">
-              {videos.map((item) => {
+            {videos.map((item) => {
+              <div className="grid gap-y-10 gap-x-8 grid-cols-5 p-8">
                 return <Card data={item} key={item.videoId} />;
-              })}
-            </div>
+              </div>;
+            })}
           </InfiniteScroll>
         ) : (
           <Shimmer />
@@ -59,6 +49,4 @@ const Home = () => {
       </div>
     </div>
   );
-};
-
-export default Home;
+}

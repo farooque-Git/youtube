@@ -5,14 +5,14 @@ import { parseData } from "../../utils/parseData";
 
 const API_KEY = process.env.React_APP_YOUTUBE_API_KEY;
 
-export const getHomePageVideos = createAsyncThunk(
-  "youtube/App/homePageVideos",
+export const getSearchPageVideos = createAsyncThunk(
+  "youtube/App/SearchPageVideos",
   async (isNext, { getState }) => {
     const {
-      youtubeApp: { nextPageToken: nextPageTokenFromState, videos },
+      youtubeApp: { nextPageToken: nextPageTokenFromState, videos, searchTerm },
     } = getState();
     const response = await axios.get(
-      `https://youtube.googleapis.com/youtube/v3/search?maxResults=20&q="OpenAI" &key=${API_KEY}&part=snippet&type=video`
+      `https://youtube.googleapis.com/youtube/v3/search?q=${searchTerm} &key=${API_KEY}&part=snippet&type=video`
     );
 
     const items = response.data.items;

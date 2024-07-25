@@ -3,8 +3,33 @@ import { FaMicrophone, FaYoutube } from "react-icons/fa";
 import { RiVideoAddLine } from "react-icons/ri";
 import { MdOutlineNotifications } from "react-icons/md";
 import { AiOutlineSearch } from "react-icons/ai";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  changeSearchTerm,
+  clearVideos,
+} from "../features/youtube/youtubeSlice";
+import { getHomePageVideos } from "../store/reducers/getHomePageVideos";
 
 export default function Navbar() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const searchTerm = useSelector((state) => state.youtubeApp.searchTerm);
+
+  const handleSearch = async () => {
+    try {
+      if (location.pathname !== "/search") {
+        navigate("/search");
+      } else {
+        dispatch(clearVideos());
+        await dispatch(getHomePageVideos(false));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row items-center justify-between bg-[#212121] text-white sticky top-0 h-auto md:h-12 p-3 md:p-0 opacity-95">
       <div className="flex items-center justify-between w-full md:w-auto space-x-4 md:space-x-60">
@@ -44,7 +69,13 @@ export default function Navbar() {
       </div>
       {/* search */}
       <div className="flex items-center justify-center w-full md:w-auto mt-3 md:mt-0">
-        <form className="flex items-center">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSearch();
+          }}
+          className="flex items-center"
+        >
           <div className="flex text-xl bg-zinc-900 items-center h-10 px-4 pr-0 rounded-3xl">
             <div className="flex gap-5 items-center pr-5">
               <input
@@ -52,6 +83,8 @@ export default function Navbar() {
                 placeholder="Search"
                 className="w-56 md:w-96 bg-zinc-900 focus:outline-none border-none"
                 aria-label="Search"
+                value={searchTerm}
+                onChange={(e) => dispatch(changeSearchTerm(e.target.value))}
               />
             </div>
             <button
